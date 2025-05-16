@@ -1,11 +1,34 @@
 {
-  "name": "keeloq",
-  "module": "index.ts",
+  "name": "@li0ard/keeloq",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
+  "author": "li0ard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/li0ard/keeloq.git"
+  },
+  "bugs": {
+    "url": "https://github.com/li0ard/keeloq/issues"
+  },
+  "homepage": "https://github.com/li0ard/keeloq#readme",
+  "description": "Playground for KeeLoq cipher",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist/ && tsc --project tsconfig.build.json",
+    "docs": "typedoc --options .config/typedoc/config.cjs"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typedoc": "^0.28.4"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  }
+  },
+  "files": ["dist"],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": ["keeloq", "crypto", "subghz"]
 }

@@ -1,0 +1,13 @@
+{
+    "name": "@li0ard/keeloq",
+    "version": "0.1.0",
+    "exports": "./src/index.ts",
+    "publish": {
+        "include": [
+            "LICENSE",
+            "CITATION.cff",
+            "README.md",
+            "src/**/*.ts"
+        ]
+    }
+}

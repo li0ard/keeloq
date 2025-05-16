@@ -1,4 +1,5 @@
-import { reverseKey, bitNumber, bitBigInt, KEELOQ_NLF, g5, type Hop, type FixAndEncryptedHop } from "./utils";
+import { LearningTypes, type FixAndEncryptedHop, type Hop } from "./types";
+import { reverseKey, bitNumber, bitBigInt, KEELOQ_NLF, g5 } from "./utils";
 
 /**
  * Get key from `fix` and `hop`
@@ -89,7 +90,7 @@ export const normal_learning = (serial: number, key: bigint): bigint => {
  * @param serial Serial number
  * @param seed Seed
  * @param key Manufacturer key
- * @returns {bigint} Key for this serial number
+ * @returns {bigint} Key for this serial number and seed
  */
 export const secure_learning = (serial: number, seed: number, key: bigint): bigint => {
     serial = serial >>> 0;
@@ -101,3 +102,70 @@ export const secure_learning = (serial: number, seed: number, key: bigint): bigi
 
     return (BigInt(k1) << 32n) | BigInt(k2)
 }
+
+/** High-level API for KeeLoq */
+export class KeeloqImpl {
+    /** Seed for Secure learning */
+    public seed: number = 0;
+
+    /**
+     * High-level API for KeeLoq
+     * @param mfkey Manufacturer key
+     * @param learning Learning type
+     * @param serial Serial number
+     * @param btn Button number
+     * @param counter Counter value (default 1)
+     */
+    constructor(public mfkey: bigint, public learning: LearningTypes, public serial: number, public btn: number, public counter = 1) {}
+
+    /** Fixed part (aka `fix`) */
+    public get fix(): number {
+        return this.btn << 28 | this.serial;
+    }
+
+    /** Unencrypted dynamic part (aka `hop`) */
+    public get hop_raw(): number {
+        return this.btn << 28 | (this.fix & 0x3FF) << 16 | this.counter;
+    }
+
+    /** Encrypted dynamic part (aka `hop`) */
+    public get hop(): number {
+        let key: bigint;
+        switch(this.learning) {
+            case LearningTypes.SIMPLE_LEARNING:
+                key = this.mfkey;
+            break;
+            case LearningTypes.NORMAL_LEARNING:
+                key = normal_learning(this.fix, this.mfkey);
+            break;
+            case LearningTypes.SECURE_LEARNING:
+                key = secure_learning(this.fix, this.seed, this.mfkey);
+            break;
+        }
+
+        return encrypt(this.hop_raw, key)
+    }
+    
+    /** Combined `fix` and `hop` */
+    public get key(): bigint {
+        return getKey(this.fix, this.hop);
+    }
+
+    /**
+     * Increment counter
+     * @param incr_value Increment value
+     */
+    public cnt_incr(incr_value: number = 1): void {
+        this.counter += incr_value;
+    }
+
+    /**
+     * Decrement counter
+     * @param decr_value Decrement value
+     */
+    public cnt_decr(decr_value: number = 1): void {
+        this.counter -= decr_value;
+    }
+}
+
+export * from "./types"

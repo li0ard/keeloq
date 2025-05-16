@@ -1,5 +1,5 @@
-import { expect, test } from "bun:test"
-import { getKey, normal_learning, secure_learning, simple_learning } from "../src";
+import { expect, test, describe } from "bun:test"
+import { getKey, KeeloqImpl, LearningTypes, normal_learning, secure_learning, simple_learning } from "../src";
 
 test("Simple learning", () => {
     let key = 0x123456789ABCDEFn
@@ -45,3 +45,57 @@ test("Secure learning", () => {
     expect(hop_dec.raw).toBe(0x11110015)
     expect(getKey(fix, hop)).toBe(0xf2d8c1b388888888n)
 })
+
+describe("KeeloqImpl", () => {
+    test("Simple learning", () => {
+        let a = new KeeloqImpl(
+            0x123456789ABCDEFn,
+            LearningTypes.SIMPLE_LEARNING,
+            0x39b3deb,
+            2,
+            10
+        )
+        expect(a.hop_raw).toBe(0x21eb000a)
+        expect(a.hop).toBe(0xf16c47a6)
+        expect(a.key).toBe(0x65e2368fd7bcd9c4n)
+        a.cnt_incr(2)
+        expect(a.key).toBe(0x1532f97fd7bcd9c4n)
+        a.cnt_decr()
+        expect(a.key).toBe(0x2f1f4f77d7bcd9c4n)
+    })
+
+    test("Normal learning", () => {
+        let a = new KeeloqImpl(
+            0x123456789ABCDEFn,
+            LearningTypes.NORMAL_LEARNING,
+            0x5999533,
+            0x2,
+            0x9
+        )
+        expect(a.hop_raw).toBe(0x21330009)
+        expect(a.hop).toBe(0x634c9949)
+        expect(a.key).toBe(0x929932c6cca999a4n)
+        a.cnt_incr(2)
+        expect(a.key).toBe(0xf7198b0fcca999a4n)
+        a.cnt_decr()
+        expect(a.key).toBe(0xf155635ecca999a4n)
+    })
+
+    test("Secure learning", () => {
+        let a = new KeeloqImpl(
+            0x123456789ABCDEFn,
+            LearningTypes.SECURE_LEARNING,
+            0x007b310,
+            0x2,
+            0x5
+        )
+        a.seed = 0x007b310
+        expect(a.hop_raw).toBe(0x23100005)
+        expect(a.hop).toBe(0xb0d15118)
+        expect(a.key).toBe(0x188a8b0d08cde004n)
+        a.cnt_incr(2)
+        expect(a.key).toBe(0x5bb1153008cde004n)
+        a.cnt_decr()
+        expect(a.key).toBe(0xd4ac267e08cde004n)
+    })
+})  

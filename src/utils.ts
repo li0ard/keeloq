@@ -18,19 +18,3 @@ export const reverseKey = (key: bigint): bigint => {
     }
     return reverseKey;
 }
-
-export interface Hop {
-    /** Button code */
-    btn: number,
-    /** Serial part (`serial & 0x3ff`) */
-    serial: number,
-    /** Counter */
-    cnt: number,
-    /** RAW `hop` */
-    raw: number
-}
-
-export interface FixAndEncryptedHop {
-    fix: number,
-    hop: number
-}
