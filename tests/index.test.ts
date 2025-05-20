@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test"
-import { getKey, KeeloqImpl, LearningTypes, normal_learning, secure_learning, simple_learning } from "../src";
+import { getKey, KeeloqImpl, LearningTypes, magic_xor_type1_learning, normal_learning, secure_learning, simple_learning } from "../src";
 
 test("Simple learning", () => {
     let key = 0x123456789ABCDEFn
@@ -44,6 +44,21 @@ test("Secure learning", () => {
     expect(hop_dec.cnt).toBe(21)
     expect(hop_dec.raw).toBe(0x11110015)
     expect(getKey(fix, hop)).toBe(0xf2d8c1b388888888n)
+})
+
+test("Magic XOR Type-1 learning", () => {
+    let hop = 0xbe94c1f2
+    let fix = 0x1088b380
+    let key = 0x123456789ABCDEFn
+
+    let man = magic_xor_type1_learning(fix & 0x0FFFFFFF, key)
+    let hop_dec = simple_learning(hop, man)
+
+    expect(hop_dec.btn).toBe(1)
+    expect(hop_dec.serial).toBe(896)
+    expect(hop_dec.cnt).toBe(10)
+    expect(hop_dec.raw).toBe(0x1380000a)
+    expect(getKey(fix, hop)).toBe(0x4f83297d01cd1108n)
 })
 
 describe("KeeloqImpl", () => {
@@ -98,4 +113,4 @@ describe("KeeloqImpl", () => {
         a.cnt_decr()
         expect(a.key).toBe(0xd4ac267e08cde004n)
     })
-})  
+})

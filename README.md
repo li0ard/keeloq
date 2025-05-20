@@ -20,6 +20,9 @@
 > The library has been created for educational purposes only. The author negatively refers to any unauthorized and/or criminal actions with systems using KeeLoq.
 > Also the author is not responsible for your actions.
 
+> [!CAUTION]
+> **Please do not distribute manufactured keys, this may result in legal consequences for you**
+
 ## Installation
 
 ```bash
@@ -31,9 +34,6 @@ bunx jsr i @li0ard/keeloq
 ```
 
 ## Examples
-
-The library contains both primitive low-level functions and a high-level API class
-
 ### Decrypt "Simple learning"
 ```ts
 import { simple_learning } from "@li0ard/keeloq"
@@ -59,6 +59,41 @@ let impl = new KeeloqImpl(
 console.log(impl.key) // -> 0x65e2368fd7bcd9c4n
 impl.cnt_incr(2) // Increasing counter by 2
 console.log(impl.key) // -> 0x1532f97fd7bcd9c4n
+```
+
+### Custom implementation
+
+> [!TIP]
+> Check [this](https://github.com/li0ard/keeloq/blob/main/examples/custom_implementation.ts) for examples
+
+The library allows users to create their own implementations of KeeLoq. To do this, create a class extending from `AbstractKeeloqImpl` and implement corresponding methods and getters.
+
+**Example (for [Beninca](https://beninca.com)):**
+```ts
+import { AbstractKeeloqImpl, magic_xor_type1_learning, encrypt, getKey } from "@li0ard/keeloq";
+
+class BenincaImplementation extends AbstractKeeloqImpl {
+    constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {
+        super(mfkey, serial, btn, counter)
+    }
+
+    public get fix(): number {
+        return this.btn << 28 | this.serial;
+    }
+
+    public get hop_raw(): number {
+        return this.btn << 28 | 0x0 << 16 | this.counter;
+    }
+
+    public get hop(): number {
+        let key: bigint = magic_xor_type1_learning(this.serial, this.mfkey);
+        return encrypt(this.hop_raw, key)
+    }
+
+    public get key(): bigint {
+        return getKey(this.fix, this.hop);
+    }
+}
 ```
 
 ## Acknowledgements

@@ -103,32 +103,84 @@ export const secure_learning = (serial: number, seed: number, key: bigint): bigi
     return (BigInt(k1) << 32n) | BigInt(k2)
 }
 
-/** High-level API for KeeLoq */
-export class KeeloqImpl {
+/**
+ * Magic XOR Type-1 learning
+ * @param serial Serial number
+ * @param key Manufacturer key
+ * @returns {bigint} Key for this serial number
+ */
+export const magic_xor_type1_learning = (serial: number, key: bigint): bigint => {
+    serial = serial >>> 0;
+    serial &= 0x0FFFFFFF;
+
+    return ((BigInt(serial) << 32n) | BigInt(serial)) ^ key;
+}
+
+/**
+ * Prototype for KeeLoq implementation
+ * @abstract
+ */
+export abstract class AbstractKeeloqImpl {
+    /**
+     * Prototype for KeeLoq implementation
+     * @param mfkey Manufacturer key
+     * @param serial Serial number
+     * @param btn Button number
+     * @param counter Counter value (default 1)
+     * @abstract
+     */
+    constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {}
+    /** Fixed part (aka `fix`) */
+    abstract get fix(): number;
+    /** Unencrypted dynamic part (aka `hop`) */
+    abstract get hop_raw(): number;
+    /** Encrypted dynamic part (aka `hop`) */
+    abstract get hop(): number;
+    /** Combined `fix` and `hop` */
+    abstract get key(): bigint;
+
+    /**
+     * Increment counter
+     * @param incr_value Increment value
+     */
+    public cnt_incr(incr_value: number = 1): void {
+        this.counter += incr_value;
+    }
+
+    /**
+     * Decrement counter
+     * @param decr_value Decrement value
+     */
+    public cnt_decr(decr_value: number = 1): void {
+        this.counter -= decr_value;
+    }
+}
+
+/** Simple high-level API for KeeLoq */
+export class KeeloqImpl extends AbstractKeeloqImpl {
     /** Seed for Secure learning */
     public seed: number = 0;
 
     /**
-     * High-level API for KeeLoq
+     * Simple high-level API for KeeLoq
      * @param mfkey Manufacturer key
      * @param learning Learning type
      * @param serial Serial number
      * @param btn Button number
      * @param counter Counter value (default 1)
      */
-    constructor(public mfkey: bigint, public learning: LearningTypes, public serial: number, public btn: number, public counter = 1) {}
+    constructor(public mfkey: bigint, public learning: LearningTypes, public serial: number, public btn: number, public counter = 1) {
+        super(mfkey, serial, btn, counter)
+    }
 
-    /** Fixed part (aka `fix`) */
     public get fix(): number {
         return this.btn << 28 | this.serial;
     }
 
-    /** Unencrypted dynamic part (aka `hop`) */
     public get hop_raw(): number {
         return this.btn << 28 | (this.fix & 0x3FF) << 16 | this.counter;
     }
 
-    /** Encrypted dynamic part (aka `hop`) */
     public get hop(): number {
         let key: bigint;
         switch(this.learning) {
@@ -146,25 +198,8 @@ export class KeeloqImpl {
         return encrypt(this.hop_raw, key)
     }
     
-    /** Combined `fix` and `hop` */
     public get key(): bigint {
         return getKey(this.fix, this.hop);
-    }
-
-    /**
-     * Increment counter
-     * @param incr_value Increment value
-     */
-    public cnt_incr(incr_value: number = 1): void {
-        this.counter += incr_value;
-    }
-
-    /**
-     * Decrement counter
-     * @param decr_value Decrement value
-     */
-    public cnt_decr(decr_value: number = 1): void {
-        this.counter -= decr_value;
     }
 }
 

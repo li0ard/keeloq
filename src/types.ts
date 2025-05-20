@@ -1,18 +1,21 @@
 /** Parsed `hop` */
 export interface Hop {
     /** Button code */
-    btn: number,
+    btn: number;
     /** Serial part (`serial & 0x3ff`) */
-    serial: number,
+    serial: number;
     /** Counter */
-    cnt: number,
+    cnt: number;
     /** RAW `hop` */
-    raw: number
+    raw: number;
 }
 
+/** Parsed `key` */
 export interface FixAndEncryptedHop {
-    fix: number,
-    hop: number
+    /** Fixed part (aka `fix`) */
+    fix: number;
+    /** Encrypted dynamic part (aka `hop`) */
+    hop: number;
 }
 
 /** KeeLoq Learning types */
