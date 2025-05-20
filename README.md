@@ -21,7 +21,7 @@
 > Also the author is not responsible for your actions.
 
 > [!CAUTION]
-> **Please do not distribute manufactured keys, this may result in legal consequences for you**
+> **Please do not distribute manufacturer keys, this may result in legal consequences for you**
 
 ## Installation
 
