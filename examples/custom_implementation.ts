@@ -40,7 +40,7 @@ console.log(beninca.key.toString(16))
 /**
  * Example for custom KeeLoq implementation
  * 
- * For example used Beninca implementation
+ * For example used Dea Mio implementation
  * from https://github.com/DarkFlippers/unleashed-firmware/blob/dev/lib/subghz/protocols/keeloq.c#L261
  */
 class DeaMioImplementation extends AbstractKeeloqImpl {
