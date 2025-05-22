@@ -5,7 +5,7 @@
     <b>@li0ard/keeloq</b><br>
     <b>Playground for KeeLoq cipher</b>
     <br>
-    <a href="https://li0ard.is-cool.dev/keeloq">docs</a>
+    <a href="https://li0ard.is-cool.dev/keeloq">docs</a>&nbsp;•&nbsp;<a href="https://li0ard.rest/apps/keeloq">online tool</a>
     <br><br>
     <a href="https://github.com/li0ard/keeloq/actions/workflows/test.yml"><img src="https://github.com/li0ard/keeloq/actions/workflows/test.yml/badge.svg" /></a>
     <a href="https://github.com/li0ard/keeloq/blob/main/LICENSE"><img src="https://img.shields.io/github/license/li0ard/keeloq" /></a>
@@ -70,15 +70,11 @@ The library allows users to create their own implementations of KeeLoq. To do th
 
 **Example (for [Beninca](https://beninca.com)):**
 ```ts
-import { AbstractKeeloqImpl, magic_xor_type1_learning, encrypt, getKey } from "@li0ard/keeloq";
+import { AbstractKeeloqImpl, magic_xor_type1_learning, encrypt } from "@li0ard/keeloq";
 
 class BenincaImplementation extends AbstractKeeloqImpl {
     constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {
         super(mfkey, serial, btn, counter)
-    }
-
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
     }
 
     public get hop_raw(): number {
@@ -88,10 +84,6 @@ class BenincaImplementation extends AbstractKeeloqImpl {
     public get hop(): number {
         let key: bigint = magic_xor_type1_learning(this.serial, this.mfkey);
         return encrypt(this.hop_raw, key)
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 ```

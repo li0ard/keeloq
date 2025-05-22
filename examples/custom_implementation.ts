@@ -1,18 +1,14 @@
-import { AbstractKeeloqImpl, magic_xor_type1_learning, encrypt, getKey } from "../src";
+import { AbstractKeeloqImpl, magic_xor_type1_learning, encrypt } from "../src";
 
 /**
  * Example for custom KeeLoq implementation
  * 
- * For example used Beninca implementation
+ * For example used Beninca protocol
  * from https://github.com/DarkFlippers/unleashed-firmware/blob/dev/lib/subghz/protocols/keeloq.c#L254
  */
 class BenincaImplementation extends AbstractKeeloqImpl {
     constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {
         super(mfkey, serial, btn, counter)
-    }
-
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
     }
 
     public get hop_raw(): number {
@@ -22,10 +18,6 @@ class BenincaImplementation extends AbstractKeeloqImpl {
     public get hop(): number {
         let key: bigint = magic_xor_type1_learning(this.serial, this.mfkey);
         return encrypt(this.hop_raw, key)
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 
@@ -40,16 +32,12 @@ console.log(beninca.key.toString(16))
 /**
  * Example for custom KeeLoq implementation
  * 
- * For example used Dea Mio implementation
+ * For example used Dea Mio protocol
  * from https://github.com/DarkFlippers/unleashed-firmware/blob/dev/lib/subghz/protocols/keeloq.c#L261
  */
 class DeaMioImplementation extends AbstractKeeloqImpl {
     constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {
         super(mfkey, serial, btn, counter)
-    }
-
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
     }
 
     public get hop_raw(): number {
@@ -63,10 +51,6 @@ class DeaMioImplementation extends AbstractKeeloqImpl {
     public get hop(): number {
         if(this.btn == 0xF) return 0
         return encrypt(this.hop_raw, this.mfkey)
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 

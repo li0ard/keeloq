@@ -1,5 +1,6 @@
 import { expect, test, describe } from "bun:test"
-import { getKey, KeeloqImpl, LearningTypes, magic_xor_type1_learning, normal_learning, secure_learning, simple_learning } from "../src";
+import { faac_learning, getKey, KeeloqImpl, LearningTypes, magic_xor_type1_learning, normal_learning, secure_learning, simple_learning } from "../src";
+import { reverseKey } from "../src/utils";
 
 test("Simple learning", () => {
     let key = 0x123456789ABCDEFn
@@ -59,6 +60,20 @@ test("Magic XOR Type-1 learning", () => {
     expect(hop_dec.cnt).toBe(10)
     expect(hop_dec.raw).toBe(0x1380000a)
     expect(getKey(fix, hop)).toBe(0x4f83297d01cd1108n)
+})
+
+test("FAAC SLH (SPA) learning", () => {
+    let hop = 0xe6ed4ad2
+    let fix = 0xa060b2d6
+    let key = 0x123456789ABCDEFn
+    let seed = 0x2e60b2d2
+
+    let man = faac_learning(seed, key)
+    let hop_dec = simple_learning(hop, man)
+
+    expect(hop_dec.raw).toBe(0xd620004c)
+    expect(reverseKey(getKey(fix, hop))).toBe(0xa060b2d6e6ed4ad2n)
+    
 })
 
 describe("KeeloqImpl", () => {

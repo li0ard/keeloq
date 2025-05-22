@@ -4,15 +4,11 @@
  * Manufacturer keys will never be published
  */
 
-import { AbstractKeeloqImpl, encrypt, getKey, normal_learning } from "../src";
+import { AbstractKeeloqImpl, encrypt, normal_learning } from "../src";
 
 export class ANMotors extends AbstractKeeloqImpl {
     constructor(public serial: number, public btn: number, public counter: number = 0x2121) {
         super(0n, serial, btn, counter)
-    }
-
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
     }
 
     public get hop_raw(): number {
@@ -21,10 +17,6 @@ export class ANMotors extends AbstractKeeloqImpl {
 
     public get hop(): number {
         return this.hop_raw
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 
     public cnt_incr(incr_value?: number): void {
@@ -41,10 +33,6 @@ export class HCS101 extends AbstractKeeloqImpl {
         super(0n, serial, btn, counter)
     }
 
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
-    }
-
     public get hop_raw(): number {
         return this.counter << 16 | (this.btn & 0xF) << 12 | 0x000;
     }
@@ -52,19 +40,11 @@ export class HCS101 extends AbstractKeeloqImpl {
     public get hop(): number {
         return this.hop_raw
     }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
-    }
 }
 
 export class Aprimatic extends AbstractKeeloqImpl {
     constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {
         super(mfkey, serial, btn, counter)
-    }
-
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
     }
 
     public get hop_raw(): number {
@@ -86,10 +66,6 @@ export class Aprimatic extends AbstractKeeloqImpl {
     public get hop(): number {
         return encrypt(this.hop_raw, this.mfkey)
     }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
-    }
 }
 
 
@@ -103,10 +79,6 @@ export class Universal1 extends AbstractKeeloqImpl {
         super(mfkey, serial, btn, counter)
     }
 
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
-    }
-
     public get hop_raw(): number {
         return this.btn << 28 | (this.serial & 0xFFF) << 16 | this.counter;
     }
@@ -118,10 +90,6 @@ export class Universal1 extends AbstractKeeloqImpl {
         }
         return encrypt(this.hop_raw, this.mfkey)
     }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
-    }
 }
 
 /**
@@ -132,20 +100,12 @@ export class Universal2 extends AbstractKeeloqImpl {
         super(mfkey, serial, btn, counter)
     }
 
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
-    }
-
     public get hop_raw(): number {
         return this.btn << 28 | (this.serial & 0xFF) << 16 | this.counter;
     }
 
     public get hop(): number {
         return encrypt(this.hop_raw, this.mfkey)
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 
@@ -161,20 +121,12 @@ export class Universal3 extends AbstractKeeloqImpl {
         super(mfkey, serial, btn, counter)
     }
 
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
-    }
-
     public get hop_raw(): number {
         return this.btn << 28 | (this.discriminator) << 16 | this.counter;
     }
 
     public get hop(): number {
         return encrypt(this.hop_raw, normal_learning(this.serial, this.mfkey))
-    }
-
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 

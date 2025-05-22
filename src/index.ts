@@ -117,6 +117,23 @@ export const magic_xor_type1_learning = (serial: number, key: bigint): bigint =>
 }
 
 /**
+ * FAAC SLH (SPA) learning
+ * @param seed Seed
+ * @param key Manufacturer key
+ * @returns {bigint} Key for this seed
+ */
+export const faac_learning = (seed: number, key: bigint): bigint => {
+    seed = seed >>> 0;
+
+    const hs = (seed >>> 16) & 0xFFFF;
+    const lsb = ((hs << 16) | 0x544D) >>> 0;
+
+    const encryptedSeed = encrypt(seed, key) >>> 0;
+    const encryptedLsb = encrypt(lsb, key) >>> 0;
+    return (BigInt(encryptedSeed) << 32n) | BigInt(encryptedLsb);
+}
+
+/**
  * Prototype for KeeLoq implementation
  * @abstract
  */
@@ -131,13 +148,17 @@ export abstract class AbstractKeeloqImpl {
      */
     constructor(public mfkey: bigint, public serial: number, public btn: number, public counter = 1) {}
     /** Fixed part (aka `fix`) */
-    abstract get fix(): number;
+    public get fix(): number {
+        return this.btn << 28 | this.serial;
+    }
     /** Unencrypted dynamic part (aka `hop`) */
     abstract get hop_raw(): number;
     /** Encrypted dynamic part (aka `hop`) */
     abstract get hop(): number;
     /** Combined `fix` and `hop` */
-    abstract get key(): bigint;
+    public get key(): bigint {
+        return getKey(this.fix, this.hop);
+    }
 
     /**
      * Increment counter
@@ -173,10 +194,6 @@ export class KeeloqImpl extends AbstractKeeloqImpl {
         super(mfkey, serial, btn, counter)
     }
 
-    public get fix(): number {
-        return this.btn << 28 | this.serial;
-    }
-
     public get hop_raw(): number {
         return this.btn << 28 | (this.fix & 0x3FF) << 16 | this.counter;
     }
@@ -196,10 +213,6 @@ export class KeeloqImpl extends AbstractKeeloqImpl {
         }
 
         return encrypt(this.hop_raw, key)
-    }
-    
-    public get key(): bigint {
-        return getKey(this.fix, this.hop);
     }
 }
 
